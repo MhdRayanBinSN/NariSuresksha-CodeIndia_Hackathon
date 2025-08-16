@@ -9,6 +9,7 @@ import { Plus, User, MoreVertical, Bell, BellOff } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { BottomNav } from '../components/BottomNav';
 import { useAuth } from '../hooks/useAuth';
+import { useDemo } from '../contexts/DemoContext';
 import { useFirebaseMessaging } from '../hooks/useFirebaseMessaging';
 import { useI18n } from '../lib/i18n';
 import { useToast } from '../hooks/use-toast';
@@ -22,6 +23,7 @@ export default function Guardians() {
   const [loading, setLoading] = useState(false);
   
   const { user, updateUserProfile } = useAuth();
+  const { demoMode, updateDemoUserProfile } = useDemo();
   const { permission, requestPermission, loading: fcmLoading, token } = useFirebaseMessaging();
   const { t } = useI18n();
   const { toast } = useToast();
@@ -52,9 +54,16 @@ export default function Guardians() {
     setLoading(true);
     try {
       const updatedGuardians = [...guardians, newGuardian];
-      await updateUserDocument(user!.uid, {
-        guardians: updatedGuardians,
-      });
+      
+      if (user?.isDemo || demoMode) {
+        // Update demo user profile
+        await updateDemoUserProfile({ guardians: updatedGuardians });
+      } else {
+        // Update Firebase user profile
+        await updateUserDocument(user!.uid, {
+          guardians: updatedGuardians,
+        });
+      }
       
       setGuardians(updatedGuardians);
       setNewGuardianName('');
@@ -62,12 +71,12 @@ export default function Guardians() {
       setAddGuardianOpen(false);
       
       toast({
-        title: t('guardians.guardian_added'),
-        description: t('guardians.guardian_added_desc', { name: newGuardian.name }),
+        title: 'Guardian Added',
+        description: `${newGuardian.name} has been added as your guardian`,
       });
     } catch (error) {
       toast({
-        title: t('errors.guardian_add_failed'),
+        title: 'Failed to add guardian',
         variant: 'destructive',
       });
     } finally {
@@ -80,19 +89,25 @@ export default function Guardians() {
     const updatedGuardians = guardians.filter((_, i) => i !== index);
     
     try {
-      await updateUserDocument(user!.uid, {
-        guardians: updatedGuardians,
-      });
+      if (user?.isDemo || demoMode) {
+        // Update demo user profile
+        await updateDemoUserProfile({ guardians: updatedGuardians });
+      } else {
+        // Update Firebase user profile
+        await updateUserDocument(user!.uid, {
+          guardians: updatedGuardians,
+        });
+      }
       
       setGuardians(updatedGuardians);
       
       toast({
-        title: t('guardians.guardian_removed'),
-        description: t('guardians.guardian_removed_desc', { name: guardian.name }),
+        title: 'Guardian Removed',
+        description: `${guardian.name} has been removed from your guardians`,
       });
     } catch (error) {
       toast({
-        title: t('errors.guardian_remove_failed'),
+        title: 'Failed to remove guardian',
         variant: 'destructive',
       });
     }

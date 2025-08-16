@@ -1,45 +1,83 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface DemoContextType {
   demoMode: boolean;
-  toggleDemoMode: () => void;
+  setDemoMode: (enabled: boolean) => void;
   getDemoETA: () => number[];
+  createDemoTrip: (data: any) => Promise<string>;
+  updateDemoUserProfile: (updates: any) => Promise<void>;
+  getDemoUser: () => any;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
 export const useDemo = () => {
   const context = useContext(DemoContext);
-  if (context === undefined) {
-    throw new Error('useDemo must be used within a DemoProvider');
+  if (!context) {
+    throw new Error('useDemo must be used within DemoProvider');
   }
   return context;
 };
 
-interface DemoProviderProps {
-  children: ReactNode;
-}
+export const DemoProvider = ({ children }: { children: ReactNode }) => {
+  const [demoMode, setDemoMode] = useState<boolean>(false);
 
-export const DemoProvider = ({ children }: DemoProviderProps) => {
-  const [demoMode, setDemoMode] = useState(() => {
-    return localStorage.getItem('nari-suraksha-demo') === 'true';
-  });
-
-  const toggleDemoMode = () => {
-    const newMode = !demoMode;
-    setDemoMode(newMode);
-    localStorage.setItem('nari-suraksha-demo', newMode.toString());
-  };
+  useEffect(() => {
+    // Check if user is in demo mode
+    const demoUser = localStorage.getItem('demo-user');
+    setDemoMode(!!demoUser);
+  }, []);
 
   const getDemoETA = () => {
-    return demoMode ? [0.5, 1, 2] : [15, 30, 45, 60];
+    return demoMode ? [0.1, 0.5, 1, 2] : [5, 10, 15, 30, 45, 60];
   };
 
-  const value = {
-    demoMode,
-    toggleDemoMode,
-    getDemoETA,
+  const createDemoTrip = async (tripData: any): Promise<string> => {
+    if (!demoMode) {
+      throw new Error('Not in demo mode');
+    }
+
+    const tripId = 'demo-trip-' + Date.now();
+    const trip = {
+      id: tripId,
+      ...tripData,
+      startedAt: new Date().toISOString(),
+      active: true,
+    };
+
+    // Store trip in localStorage
+    const existingTrips = JSON.parse(localStorage.getItem('demo-trips') || '[]');
+    existingTrips.push(trip);
+    localStorage.setItem('demo-trips', JSON.stringify(existingTrips));
+
+    return tripId;
   };
 
-  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
+  const updateDemoUserProfile = async (updates: any): Promise<void> => {
+    if (!demoMode) {
+      throw new Error('Not in demo mode');
+    }
+
+    const demoUser = JSON.parse(localStorage.getItem('demo-user') || '{}');
+    const updatedUser = { ...demoUser, ...updates };
+    localStorage.setItem('demo-user', JSON.stringify(updatedUser));
+  };
+
+  const getDemoUser = () => {
+    if (!demoMode) return null;
+    return JSON.parse(localStorage.getItem('demo-user') || 'null');
+  };
+
+  return (
+    <DemoContext.Provider value={{
+      demoMode,
+      setDemoMode,
+      getDemoETA,
+      createDemoTrip,
+      updateDemoUserProfile,
+      getDemoUser,
+    }}>
+      {children}
+    </DemoContext.Provider>
+  );
 };

@@ -23,7 +23,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   
   const { user } = useAuth();
-  const { demoMode, getDemoETA } = useDemo();
+  const { demoMode, getDemoETA, createDemoTrip } = useDemo();
   const { t } = useI18n();
   const { toast } = useToast();
 
@@ -32,11 +32,23 @@ export default function Home() {
     
     setLoading(true);
     try {
-      const tripId = await createTrip({
-        ownerUid: user.uid,
-        etaMinutes,
-        active: true,
-      });
+      let tripId: string;
+      
+      if (user.isDemo || demoMode) {
+        // Use demo trip creation from context
+        tripId = await createDemoTrip({
+          ownerUid: user.uid,
+          etaMinutes,
+          active: true,
+        });
+      } else {
+        // Use Firebase
+        tripId = await createTrip({
+          ownerUid: user.uid,
+          etaMinutes,
+          active: true,
+        });
+      }
       
       toast({
         title: t('trip.started'),
@@ -46,6 +58,7 @@ export default function Home() {
       setStartTripOpen(false);
       setLocation(`/trip/${tripId}`);
     } catch (error) {
+      console.error('Trip creation error:', error);
       toast({
         title: t('errors.trip_start_failed'),
         variant: 'destructive',
@@ -70,7 +83,7 @@ export default function Home() {
               </span>
             </div>
             <p className="text-xs text-safety-600 mt-1">
-              {t('status.last_active', { time: '2 minutes ago' })}
+              Last active 2 minutes ago
             </p>
           </CardContent>
         </Card>
