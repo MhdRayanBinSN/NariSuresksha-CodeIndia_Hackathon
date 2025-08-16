@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(222.2 84% 4.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(222.2 84% 4.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(222.2 84% 4.9%);
+  --primary: hsl(210 83% 53%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 40% 96%);
+  --secondary-foreground: hsl(222.2 84% 4.9%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --accent: hsl(210 40% 96%);
+  --accent-foreground: hsl(222.2 84% 4.9%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(210 83% 53%);
+  --chart-1: hsl(210 83% 53%);
+  --chart-2: hsl(159.8 100% 36.1%);
+  --chart-3: hsl(42.3 92.8% 56.3%);
+  --chart-4: hsl(147.1 78.5% 42%);
+  --chart-5: hsl(341.5 75.2% 51%);
+  --safety: hsl(158 64% 52%);
+  --safety-foreground: hsl(0 0% 100%);
+  --warning: hsl(39 100% 57%);
+  --warning-foreground: hsl(0 0% 100%);
+  --emergency: hsl(0 84% 60%);
+  --emergency-foreground: hsl(0 0% 100%);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: hsl(222.2 84% 4.9%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(222.2 84% 4.9%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(222.2 84% 4.9%);
+  --popover-foreground: hsl(210 40% 98%);
+  --primary: hsl(210 83% 53%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(217.2 32.6% 17.5%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+  --accent: hsl(217.2 32.6% 17.5%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(217.2 32.6% 17.5%);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(210 83% 53%);
+  --chart-1: hsl(210 83% 53%);
+  --chart-2: hsl(159.8 100% 36.1%);
+  --chart-3: hsl(42.3 92.8% 56.3%);
+  --chart-4: hsl(147.1 78.5% 42%);
+  --chart-5: hsl(341.5 75.2% 51%);
+  --safety: hsl(158 64% 52%);
+  --safety-foreground: hsl(0 0% 100%);
+  --warning: hsl(39 100% 57%);
+  --warning-foreground: hsl(0 0% 100%);
+  --emergency: hsl(0 84% 60%);
+  --emergency-foreground: hsl(0 0% 100%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .emergency-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .map-container {
+    background: linear-gradient(45deg, #E8F5E8 25%, transparent 25%), 
+                linear-gradient(-45deg, #E8F5E8 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #E8F5E8 75%), 
+                linear-gradient(-45deg, transparent 75%, #E8F5E8 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+  
+  .high-contrast {
+    filter: contrast(150%) brightness(110%);
+  }
+
+  .safety-50 {
+    background-color: hsl(158 64% 97%);
+  }
+  
+  .safety-200 {
+    border-color: hsl(158 64% 85%);
+  }
+  
+  .safety-500 {
+    background-color: var(--safety);
+    color: var(--safety-foreground);
+  }
+  
+  .safety-600 {
+    background-color: hsl(158 64% 45%);
+  }
+  
+  .safety-700 {
+    color: hsl(158 64% 35%);
+  }
+  
+  .warning-50 {
+    background-color: hsl(39 100% 97%);
+  }
+  
+  .warning-200 {
+    border-color: hsl(39 100% 85%);
+  }
+  
+  .warning-500 {
+    background-color: var(--warning);
+    color: var(--warning-foreground);
+  }
+  
+  .warning-600 {
+    background-color: hsl(39 100% 50%);
+  }
+  
+  .warning-700 {
+    color: hsl(39 100% 35%);
+  }
+  
+  .emergency-500 {
+    background-color: var(--emergency);
+    color: var(--emergency-foreground);
+  }
+  
+  .emergency-600 {
+    background-color: hsl(0 84% 55%);
+  }
+}
