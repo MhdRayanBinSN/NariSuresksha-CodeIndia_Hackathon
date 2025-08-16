@@ -21,6 +21,7 @@ export default function Login() {
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
   const [name, setName] = useState('');
   const [role, setRole] = useState('commuter');
+  const [demoMode, setDemoMode] = useState(false);
   
   const { user, updateUserProfile } = useAuth();
   const { toast } = useToast();
@@ -43,21 +44,40 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const recaptchaVerifier = setupRecaptcha('recaptcha-container');
-      const formattedPhone = phone.startsWith('+91') ? phone : `+91${phone}`;
-      const result = await sendPhoneOTP(formattedPhone, recaptchaVerifier);
-      setConfirmationResult(result);
-      setStep('otp');
-      toast({
-        title: t('auth.otp_sent'),
-        description: t('auth.otp_sent_desc'),
-      });
+      if (demoMode) {
+        // Demo mode - skip Firebase phone auth
+        setConfirmationResult({ verificationId: 'demo-verification-id' });
+        setStep('otp');
+        toast({
+          title: 'Demo Mode Active',
+          description: 'Use OTP: 123456 to continue',
+        });
+      } else {
+        const recaptchaVerifier = setupRecaptcha('recaptcha-container');
+        const formattedPhone = phone.startsWith('+91') ? phone : `+91${phone}`;
+        const result = await sendPhoneOTP(formattedPhone, recaptchaVerifier);
+        setConfirmationResult(result);
+        setStep('otp');
+        toast({
+          title: t('auth.otp_sent'),
+          description: t('auth.otp_sent_desc'),
+        });
+      }
     } catch (error: any) {
-      toast({
-        title: t('errors.otp_send_failed'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      console.error('Authentication error:', error);
+      if (error.code === 'auth/billing-not-enabled' || error.code === 'auth/configuration-not-found') {
+        toast({
+          title: 'Phone Auth Not Available',
+          description: 'Enable Demo Mode to continue without phone verification',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: t('errors.otp_send_failed'),
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -74,11 +94,24 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await verifyOTP(confirmationResult.verificationId, otp);
-      setStep('profile');
-      toast({
-        title: t('auth.phone_verified'),
-      });
+      if (demoMode) {
+        // Demo mode - check for demo OTP
+        if (otp === '123456') {
+          setStep('profile');
+          toast({
+            title: 'Demo Login Successful',
+            description: 'You can now complete your profile',
+          });
+        } else {
+          throw new Error('Demo OTP should be 123456');
+        }
+      } else {
+        await verifyOTP(confirmationResult.verificationId, otp);
+        setStep('profile');
+        toast({
+          title: t('auth.phone_verified'),
+        });
+      }
     } catch (error: any) {
       toast({
         title: t('errors.otp_verify_failed'),
@@ -101,18 +134,38 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await updateUserProfile({
-        name: name.trim(),
-        phone: phone.startsWith('+91') ? phone : `+91${phone}`,
-        role,
-        lang: 'en',
-        guardians: [],
-        pushTokens: [],
-      });
-      toast({
-        title: t('auth.profile_created'),
-      });
-      setLocation('/');
+      if (demoMode) {
+        // Demo mode - create a local demo user session
+        const demoUser = {
+          uid: 'demo-user-' + Date.now(),
+          name: name.trim(),
+          phone: phone.startsWith('+91') ? phone : `+91${phone}`,
+          role,
+          lang: 'en',
+          guardians: [],
+          pushTokens: [],
+          isDemo: true,
+        };
+        localStorage.setItem('demo-user', JSON.stringify(demoUser));
+        toast({
+          title: 'Demo Profile Created',
+          description: 'Welcome to NariSuraksha demo!',
+        });
+        window.location.reload(); // Refresh to load demo user
+      } else {
+        await updateUserProfile({
+          name: name.trim(),
+          phone: phone.startsWith('+91') ? phone : `+91${phone}`,
+          role,
+          lang: 'en',
+          guardians: [],
+          pushTokens: [],
+        });
+        toast({
+          title: t('auth.profile_created'),
+        });
+        setLocation('/');
+      }
     } catch (error: any) {
       toast({
         title: t('errors.profile_creation_failed'),
@@ -142,6 +195,24 @@ export default function Login() {
         {step === 'phone' && (
           <Card>
             <CardContent className="space-y-4 pt-6">
+              <div className="bg-orange-50 border border-orange-200 rounded-md p-3 mb-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="demo-mode"
+                    checked={demoMode}
+                    onChange={(e) => setDemoMode(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="demo-mode" className="text-sm font-medium text-orange-800">
+                    Demo Mode (Skip Phone Authentication)
+                  </Label>
+                </div>
+                <p className="text-xs text-orange-700 mt-1">
+                  Firebase requires billing for phone auth. Enable demo mode to test the app.
+                </p>
+              </div>
+
               <div>
                 <Label htmlFor="phone">{t('auth.phone_number')}</Label>
                 <div className="relative mt-2">
@@ -151,7 +222,7 @@ export default function Login() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder={t('auth.phone_placeholder')}
+                    placeholder={demoMode ? "9999999999 (any number for demo)" : t('auth.phone_placeholder')}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="pl-12"
@@ -167,10 +238,10 @@ export default function Login() {
                 data-testid="button-send-otp"
               >
                 {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {t('auth.send_otp')}
+                {demoMode ? 'Continue with Demo' : t('auth.send_otp')}
               </Button>
               
-              <div id="recaptcha-container"></div>
+              {!demoMode && <div id="recaptcha-container"></div>}
             </CardContent>
           </Card>
         )}

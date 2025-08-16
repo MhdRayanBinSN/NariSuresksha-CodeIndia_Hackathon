@@ -11,6 +11,7 @@ interface AuthUser extends FirebaseUser {
     guardians: Array<{ name: string; phone: string }>;
     pushTokens: string[];
   };
+  isDemo?: boolean;
 }
 
 interface AuthContextType {
@@ -38,6 +39,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for demo user first
+    const demoUser = localStorage.getItem('demo-user');
+    if (demoUser) {
+      try {
+        const parsedDemoUser = JSON.parse(demoUser);
+        setUser({
+          uid: parsedDemoUser.uid,
+          profile: parsedDemoUser,
+          isDemo: true,
+        } as AuthUser);
+        setLoading(false);
+        return;
+      } catch (error) {
+        console.error('Error parsing demo user:', error);
+        localStorage.removeItem('demo-user');
+      }
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
