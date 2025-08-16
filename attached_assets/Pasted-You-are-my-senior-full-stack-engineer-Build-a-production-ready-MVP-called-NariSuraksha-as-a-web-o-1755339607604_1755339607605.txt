@@ -1,0 +1,216 @@
+You are my senior full‑stack engineer. Build a production‑ready MVP called “NariSuraksha” as a web-only PWA that enhances women’s night‑commute safety. Optimize for a 24‑hour hackathon: minimal dependencies, reliable demo, clear docs. Use only web tech—no native apps.
+
+Goal
+
+Ship a Next.js 14 + TypeScript + Tailwind + shadcn/ui PWA.
+
+Core flows:
+
+Start Trip → ETA timer → auto‑SOS → guardian web push → incident page with live location.
+
+Report Unsafe Spot → category + optional text → heatmap clustering.
+
+Guardians management + push token registration.
+
+Include Demo Mode (mock location, short timers), WhatsApp fallback if push blocked, and a Dispatcher Log of state transitions.
+
+Tech and Libraries
+
+Next.js 14 (App Router) + TypeScript
+
+Tailwind CSS + shadcn/ui (Button, Input, Dialog, Select, Switch/Toggle, Sheet, Toaster)
+
+Firebase: Auth (phone OTP), Firestore, Functions, Messaging (FCM for web push)
+
+Maps: react‑leaflet + Leaflet + OpenStreetMap tiles (no paid keys)
+
+Geospatial: ngeohash for reports; client‑side Haversine filtering where needed
+
+State: React Query or lightweight hooks
+
+Utilities: zod, react‑hook‑form, date‑fns, lucide‑react
+
+Data Model (Firestore)
+
+users/{uid}: { phone, name, role: "commuter"|"guardian"|"both", lang: "en"|"hi", guardians: [{ name, phone }], pushTokens: string[], createdAt }
+
+trips/{tripId}: { ownerUid, startedAt, etaMinutes, active: boolean, lastLat, lastLng, lastUpdateAt }
+
+incidents/{incidentId}: { tripId, ownerUid, lat, lng, status: "pending"|"broadcasting"|"resolved", createdAt }
+
+reports/{reportId}: { lat, lng, category: "harassment"|"poor_lighting"|"stray_dogs"|"other", text?: string, anonymous: boolean, geohash: string, createdAt }
+
+Pages and Routes
+
+/login: Phone OTP auth; post‑login collect name and role.
+
+/: Home with Start Trip, Report Unsafe Spot, language toggle, Demo Mode toggle, and quick links.
+
+/trip/[id]: Victim dashboard with ETA countdown, live map (geolocation watchPosition every 10–15s), “I’m Safe (End Trip)”, “Trigger SOS Now”, Dispatcher Log panel.
+
+/incident/[id]: Guardian view with live map (subscribe to related trip), “Call Victim” (tel:), “Open in Maps” (Google Maps deep link), “Share Link” (Web Share API), “Resolve” (visible only to victim).
+
+/guardians: Manage guardians list; request notification permission; save FCM push token to users/{uid}.pushTokens. Show token status.
+
+/reports: Map with clustered reports; filter by category; “Add report” dialog with current location or map click.
+
+Core Behaviors
+
+Start Trip: Create trips doc, navigate to /trip/[id]; start geolocation updates; store lastLat/lastLng/lastUpdateAt.
+
+Timer: Countdown from etaMinutes; on 0 while active, create incident, set status="broadcasting", trigger push notifications to all users/{ownerUid}.pushTokens (and optionally demo to self).
+
+notifyGuardians Cloud Function: On incidents/{id} create, read owner user doc, send FCM webpush with title “SOS Alert” and link to /incident/[id].
+
+WhatsApp fallback: If Notification permission denied, show share button that opens prefilled message “SOS – view live location: https://YOUR_DOMAIN/incident/[id]”.
+
+Reports: Save with ngeohash.encode(lat,lng); on /reports, cluster markers by rounded lat/lng or simple count circles.
+
+i18n: messages.en.json and messages.hi.json; header toggle persists to users.lang and localStorage.
+
+PWA: manifest.json, service worker for caching shell and FCM handling; install prompt button in header.
+
+Accessibility: Large tap targets, aria labels, high contrast option.
+
+Replit Tasks (generate code and files)
+
+Scaffold project
+
+Initialize Next.js 14 + TS; add Tailwind; integrate shadcn/ui components.
+
+Add folder structure: app/(routes), components/, lib/, hooks/, styles/.
+
+Add src/lib/firebase.ts to init Firebase and export auth, db, messaging, fcm getToken helper.
+
+Env and config
+
+Create .env.local.sample with:
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=
+NEXT_PUBLIC_SITE_URL=https://your-replit-url
+
+Read these in firebase init and FCM setup.
+
+Auth
+
+/login with Firebase phone OTP (reCAPTCHA verifier).
+
+After login first time, collect name and role, save users/{uid}.
+
+Header and layout
+
+Top bar: app name, EN/HI toggle, Install App button, Profile menu, Demo Mode switch.
+
+Toaster and global styles.
+
+Guardians
+
+/guardians: list guardians (name, phone), add/remove dialog.
+
+“Enable Notifications” button: request Notification permission, get FCM token, save to users.pushTokens (dedupe).
+
+Show current token last updated time.
+
+Home
+
+Buttons: Start Trip, Report Unsafe Spot, View Reports, Guardians, language toggle, Demo Mode.
+
+If Demo Mode on: mock location to fixed lat/lng; shorten default ETA options to 0.5/1/2min.
+
+Trip page
+
+Create trip on Start Trip; show countdown; auto‑SOS on timeout.
+
+watchPosition to update lastLat/lastLng; if Demo Mode, simulate movement slightly.
+
+Buttons: “I’m Safe (End Trip)”, “Trigger SOS Now”.
+
+Dispatcher Log component: append state changes (trip created, location updated, incident created, push sent, resolved).
+
+Incidents + Cloud Function
+
+Create incidents on SOS; status flow pending → broadcasting → resolved.
+
+Add Firebase Cloud Functions directory; implement notifyGuardians onCreate(incidents/{id}) to send webpush to users.pushTokens with a link to /incident/[id].
+
+Add public/firebase-messaging-sw.js to handle FCM in service worker; foreground handler shows toast, clicking opens link.
+
+Incident page
+
+Subscribe to related trip doc; show live map centered on victim.
+
+Buttons: Call tel:, Open in Maps https://maps.google.com/?q=lat,lng, Share link, Resolve (owner only).
+
+Show incident status and last updated time.
+
+Reports + Heatmap
+
+/reports page with map and category filter; cluster markers by rounding lat/lng or simple count bubble.
+
+“Report Unsafe Spot” dialog from home: get geolocation or map click, category, optional text, anonymous toggle; save with geohash.
+
+i18n + accessibility
+
+Implement simple i18n hook loading messages.en.json and messages.hi.json; all labels pull from it.
+
+Add High Contrast toggle; ensure aria labels and keyboard nav.
+
+PWA
+
+Add manifest.json, icons, and service worker caching app shell.
+
+“Install App” button via beforeinstallprompt.
+
+Demo polish
+
+Demo Mode switch in settings (persist to localStorage).
+
+Seed actions: “Create 2 nearby demo reports”.
+
+WhatsApp fallback button for SOS when notifications blocked.
+
+Docs
+
+README.md: problem, solution, features, tech, setup, env, how to run, deploy on Replit/Vercel, scoring matrix mapping, privacy, limitations, roadmap.
+
+DEMO.md: 90‑second script with steps and expected screens.
+
+Add screenshots folder and a quick architecture diagram (ASCII is fine).
+
+Acceptance Criteria
+
+Runs on Replit (npm run dev) and builds without errors.
+
+Phone OTP login works; can add guardians and register web push on at least the same device.
+
+Start Trip with 1min ETA; on expiry, incident is created; web push received on same device; clicking opens /incident/[id] showing live location.
+
+Report Unsafe Spot creates a visible marker; clusters appear on /reports.
+
+PWA is installable; offline shell loads; FCM SW processes notifications.
+
+Demo Mode shortens timers and mocks location for reliable judging.
+
+Post‑Generation Instructions for Me
+
+Fill .env.local with Firebase project values and VAPID key.
+
+In Firebase console: enable Phone Auth; create Firestore; deploy Functions; enable Cloud Messaging and upload a web push certificate (VAPID).
+
+Update NEXT_PUBLIC_SITE_URL with the Replit URL.
+
+Test on two mobile browsers if possible; else test push on one device with WhatsApp fallback.
+
+Now generate all necessary code, configuration, and files, and print:
+
+exact commands to run locally on Replit
+
+any manual Firebase console steps
+
+where to paste env values
+
+the deployed URL placeholders used inside notifications
