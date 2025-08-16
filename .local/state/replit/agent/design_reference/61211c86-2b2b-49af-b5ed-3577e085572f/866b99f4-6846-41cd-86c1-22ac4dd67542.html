@@ -1,0 +1,826 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NariSuraksha - Women's Safety PWA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#E3F2FD',
+                            500: '#1976D2',
+                            600: '#1565C0',
+                            700: '#0D47A1'
+                        },
+                        safety: {
+                            50: '#E0F2F1',
+                            500: '#00695C',
+                            600: '#00574B',
+                            700: '#004D40'
+                        },
+                        warning: {
+                            500: '#F57C00',
+                            600: '#EF6C00'
+                        },
+                        emergency: {
+                            500: '#D32F2F',
+                            600: '#C62828'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .emergency-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .map-container {
+            background: linear-gradient(45deg, #E8F5E8 25%, transparent 25%), 
+                        linear-gradient(-45deg, #E8F5E8 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #E8F5E8 75%), 
+                        linear-gradient(-45deg, transparent 75%, #E8F5E8 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        .high-contrast {
+            filter: contrast(150%) brightness(110%);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-900">
+    <!-- Navigation Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-white text-sm"></i>
+                </div>
+                <h1 class="text-lg font-semibold text-gray-900">NariSuraksha</h1>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <!-- Language Toggle -->
+                <button class="flex items-center space-x-1 px-2 py-1 rounded-md bg-gray-100 text-sm font-medium">
+                    <span>EN</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                
+                <!-- Install PWA -->
+                <button class="px-3 py-1.5 bg-primary-500 text-white text-sm font-medium rounded-md">
+                    <i class="fas fa-download text-xs mr-1"></i>
+                    Install
+                </button>
+                
+                <!-- Profile Menu -->
+                <button class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Page Container -->
+    <div class="max-w-md mx-auto min-h-screen bg-white relative">
+        
+        <!-- Login Page -->
+        <div id="loginPage" class="p-6 space-y-6">
+            <div class="text-center py-8">
+                <div class="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome to NariSuraksha</h2>
+                <p class="text-gray-600">Your trusted companion for safe night commutes</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                            <span class="text-gray-500 text-sm">+91</span>
+                        </div>
+                        <input type="tel" placeholder="Enter your phone number" 
+                               class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <button class="w-full bg-primary-500 text-white py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors">
+                    Send OTP
+                </button>
+            </div>
+
+            <!-- OTP Verification -->
+            <div class="space-y-4 pt-6 border-t">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Enter OTP</label>
+                    <div class="flex space-x-2">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <input type="text" maxlength="1" class="w-12 h-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                    </div>
+                </div>
+                
+                <button class="w-full bg-safety-500 text-white py-3 rounded-lg font-medium hover:bg-safety-600 transition-colors">
+                    Verify & Continue
+                </button>
+                
+                <button class="w-full text-primary-500 py-2 text-sm font-medium">
+                    Didn't receive OTP? Resend
+                </button>
+            </div>
+        </div>
+
+        <!-- Home Dashboard -->
+        <div id="homePage" class="hidden p-6 space-y-6">
+            <!-- Demo Mode Toggle -->
+            <div class="bg-warning-50 border border-warning-200 rounded-lg p-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-flask text-warning-500"></i>
+                    <span class="text-sm font-medium text-warning-700">Demo Mode</span>
+                </div>
+                <button class="w-12 h-6 bg-warning-500 rounded-full relative">
+                    <div class="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+                </button>
+            </div>
+
+            <!-- Quick Status -->
+            <div class="bg-safety-50 border border-safety-200 rounded-lg p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span class="text-sm font-medium text-safety-700">Status: Safe</span>
+                </div>
+                <p class="text-xs text-safety-600 mt-1">Last active: 2 minutes ago</p>
+            </div>
+
+            <!-- Main Actions -->
+            <div class="space-y-4">
+                <button class="w-full bg-primary-500 text-white p-4 rounded-xl flex items-center space-x-3 hover:bg-primary-600 transition-colors shadow-lg">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-route text-white text-lg"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-semibold text-lg">Start Trip</h3>
+                        <p class="text-primary-100 text-sm">Begin tracking your journey</p>
+                    </div>
+                </button>
+
+                <button class="w-full bg-warning-500 text-white p-4 rounded-xl flex items-center space-x-3 hover:bg-warning-600 transition-colors shadow-lg">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-semibold text-lg">Report Unsafe Spot</h3>
+                        <p class="text-warning-100 text-sm">Alert others about unsafe areas</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Secondary Actions -->
+            <div class="grid grid-cols-2 gap-4">
+                <button class="bg-white border border-gray-200 p-4 rounded-lg text-center hover:bg-gray-50 transition-colors">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <i class="fas fa-users text-blue-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">Guardians</span>
+                </button>
+
+                <button class="bg-white border border-gray-200 p-4 rounded-lg text-center hover:bg-gray-50 transition-colors">
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <i class="fas fa-map-marked-alt text-red-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">View Reports</span>
+                </button>
+            </div>
+
+            <!-- Settings -->
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 class="font-medium text-gray-900 mb-3">Quick Settings</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-700">High Contrast</span>
+                        <button class="w-10 h-6 bg-gray-200 rounded-full relative">
+                            <div class="w-4 h-4 bg-white rounded-full absolute left-1 top-1 shadow-sm"></div>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-700">Sound Alerts</span>
+                        <button class="w-10 h-6 bg-primary-500 rounded-full relative">
+                            <div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1 shadow-sm"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trip Tracking Page -->
+        <div id="tripPage" class="hidden">
+            <!-- Trip Header -->
+            <div class="bg-primary-500 text-white p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-arrow-left text-sm"></i>
+                    </button>
+                    <h2 class="font-semibold">Trip in Progress</h2>
+                    <div class="w-8"></div>
+                </div>
+
+                <!-- ETA Countdown -->
+                <div class="text-center">
+                    <div class="text-4xl font-bold mb-2">12:45</div>
+                    <p class="text-primary-100">Estimated arrival time remaining</p>
+                </div>
+            </div>
+
+            <!-- Live Map -->
+            <div class="h-64 map-container relative">
+                <!-- Mock map with location markers -->
+                <div class="absolute inset-0 bg-green-100 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="w-4 h-4 bg-blue-500 rounded-full mx-auto mb-2 emergency-pulse"></div>
+                        <p class="text-xs text-gray-600">Live Location Tracking</p>
+                    </div>
+                </div>
+                
+                <!-- Route indicators -->
+                <div class="absolute top-4 left-4 bg-white rounded-lg p-2 shadow-sm">
+                    <div class="flex items-center space-x-2 text-xs">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>GPS Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trip Controls -->
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="bg-green-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-600 transition-colors">
+                        <i class="fas fa-check mr-2"></i>
+                        I'm Safe
+                    </button>
+                    
+                    <button class="bg-emergency-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emergency-600 transition-colors emergency-pulse">
+                        <i class="fas fa-exclamation mr-2"></i>
+                        SOS Now
+                    </button>
+                </div>
+
+                <!-- Trip Info -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-900 mb-2">Trip Details</h3>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div class="flex justify-between">
+                            <span>Started:</span>
+                            <span>9:15 PM</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Expected arrival:</span>
+                            <span>9:30 PM</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Guardians notified:</span>
+                            <span class="text-green-600">3 contacts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dispatcher Log -->
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-900 mb-3 flex items-center">
+                        <i class="fas fa-list text-gray-500 mr-2"></i>
+                        Activity Log
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-600">Trip started - 9:15 PM</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-600">Location updated - 9:17 PM</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-600">Guardians notified - 9:15 PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guardian Management -->
+        <div id="guardiansPage" class="hidden p-6 space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-900">Guardians</h2>
+                <button class="bg-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    <i class="fas fa-plus mr-1"></i>
+                    Add Guardian
+                </button>
+            </div>
+
+            <!-- Notification Status -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium text-blue-900">Push Notifications</h3>
+                        <p class="text-sm text-blue-700">Enable to receive emergency alerts</p>
+                    </div>
+                    <button class="bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm font-medium">
+                        Enable
+                    </button>
+                </div>
+                <div class="mt-3 text-xs text-blue-600">
+                    Last updated: Never
+                </div>
+            </div>
+
+            <!-- Guardians List -->
+            <div class="space-y-3">
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Priya Sharma</h3>
+                                <p class="text-sm text-gray-600">+91 98765 43210</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Rahul Kumar</h3>
+                                <p class="text-sm text-gray-600">+91 87654 32109</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-900">Anita Desai</h3>
+                                <p class="text-sm text-gray-600">+91 76543 21098</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Guardian Form -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="font-medium text-gray-900 mb-3">Add New Guardian</h3>
+                <div class="space-y-3">
+                    <input type="text" placeholder="Guardian Name" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500">
+                    <input type="tel" placeholder="Phone Number" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500">
+                    <button class="w-full bg-primary-500 text-white py-2 rounded-md font-medium">
+                        Add Guardian
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports/Heatmap Page -->
+        <div id="reportsPage" class="hidden">
+            <!-- Filter Header -->
+            <div class="bg-white border-b border-gray-200 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-lg font-semibold text-gray-900">Safety Reports</h2>
+                    <button class="bg-warning-500 text-white px-3 py-1.5 rounded-md text-sm font-medium">
+                        <i class="fas fa-plus mr-1"></i>
+                        Report
+                    </button>
+                </div>
+                
+                <!-- Category Filters -->
+                <div class="flex space-x-2 overflow-x-auto pb-2">
+                    <button class="px-3 py-1 bg-primary-500 text-white rounded-full text-sm whitespace-nowrap">All</button>
+                    <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap">Harassment</button>
+                    <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap">Poor Lighting</button>
+                    <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap">Stray Dogs</button>
+                    <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm whitespace-nowrap">Other</button>
+                </div>
+            </div>
+
+            <!-- Map with Reports -->
+            <div class="h-96 map-container relative">
+                <div class="absolute inset-0 bg-green-50">
+                    <!-- Mock clustered report markers -->
+                    <div class="absolute top-1/4 left-1/3 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">3</div>
+                    <div class="absolute top-1/2 right-1/4 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
+                    <div class="absolute bottom-1/3 left-1/2 w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">5</div>
+                    <div class="absolute top-1/3 right-1/3 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold">2</div>
+                </div>
+                
+                <!-- Map Legend -->
+                <div class="absolute bottom-4 left-4 bg-white rounded-lg p-3 shadow-lg">
+                    <h4 class="text-xs font-semibold text-gray-800 mb-2">Report Types</h4>
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <span>Harassment</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                            <span>Poor Lighting</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span>Stray Dogs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reports List -->
+            <div class="p-4 space-y-3">
+                <h3 class="font-medium text-gray-900">Recent Reports</h3>
+                
+                <div class="bg-white border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-exclamation text-red-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Harassment Incident</h4>
+                                <p class="text-sm text-gray-600">Near Metro Station, Sector 18</p>
+                                <p class="text-xs text-gray-500 mt-1">2 hours ago • Anonymous</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-red-600 font-medium">High Risk</span>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-lightbulb text-orange-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Poor Street Lighting</h4>
+                                <p class="text-sm text-gray-600">Underpass near City Mall</p>
+                                <p class="text-xs text-gray-500 mt-1">5 hours ago • Priya S.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-orange-600 font-medium">Medium Risk</span>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mt-1">
+                                <i class="fas fa-dog text-yellow-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Stray Dogs</h4>
+                                <p class="text-sm text-gray-600">Park Road, Behind Hospital</p>
+                                <p class="text-xs text-gray-500 mt-1">1 day ago • Anjali M.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-yellow-600 font-medium">Low Risk</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incident Page (Guardian View) -->
+        <div id="incidentPage" class="hidden">
+            <!-- Emergency Header -->
+            <div class="bg-emergency-500 text-white p-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 emergency-pulse">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold mb-1">Emergency Alert</h2>
+                    <p class="text-emergency-100">Priya needs immediate assistance</p>
+                </div>
+            </div>
+
+            <!-- Live Location Map -->
+            <div class="h-64 map-container relative">
+                <div class="absolute inset-0 bg-red-50 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="w-6 h-6 bg-red-500 rounded-full mx-auto mb-2 emergency-pulse"></div>
+                        <p class="text-sm font-medium text-red-700">Live Location</p>
+                        <p class="text-xs text-red-600">Last updated: 30 seconds ago</p>
+                    </div>
+                </div>
+                
+                <!-- Emergency info overlay -->
+                <div class="absolute top-4 left-4 bg-white rounded-lg p-3 shadow-lg">
+                    <div class="text-xs">
+                        <div class="font-semibold text-gray-800">Incident #2024001</div>
+                        <div class="text-gray-600">Status: Broadcasting</div>
+                        <div class="text-red-600 font-medium">High Priority</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Actions -->
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="bg-green-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-600 transition-colors">
+                        <i class="fas fa-phone mr-2"></i>
+                        Call Priya
+                    </button>
+                    
+                    <button class="bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-map-marked-alt mr-2"></i>
+                        Open Maps
+                    </button>
+                </div>
+
+                <button class="w-full bg-primary-500 text-white py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors">
+                    <i class="fas fa-share mr-2"></i>
+                    Share Location Link
+                </button>
+
+                <!-- WhatsApp Fallback -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fab fa-whatsapp text-green-600"></i>
+                        <span class="text-sm font-medium text-green-800">WhatsApp Backup</span>
+                    </div>
+                    <p class="text-xs text-green-700 mb-2">Send emergency alert via WhatsApp</p>
+                    <button class="bg-green-500 text-white px-3 py-1.5 rounded-md text-sm font-medium">
+                        Send WhatsApp Alert
+                    </button>
+                </div>
+
+                <!-- Incident Details -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-900 mb-3">Incident Information</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Triggered:</span>
+                            <span class="font-medium">9:32 PM</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Trip started:</span>
+                            <span class="font-medium">9:15 PM</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Expected arrival:</span>
+                            <span class="font-medium">9:30 PM (Overdue)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Location accuracy:</span>
+                            <span class="font-medium text-green-600">High (±5m)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resolution (Victim only) -->
+                <button class="w-full bg-safety-500 text-white py-3 rounded-lg font-medium hover:bg-safety-600 transition-colors">
+                    <i class="fas fa-check mr-2"></i>
+                    Mark as Resolved
+                </button>
+            </div>
+        </div>
+
+        <!-- Report Creation Modal -->
+        <div id="reportModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end">
+            <div class="bg-white rounded-t-xl w-full max-w-md mx-auto">
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Report Unsafe Spot</h3>
+                        <button class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-times text-gray-600"></i>
+                        </button>
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <div class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                            <i class="fas fa-map-marker-alt text-primary-500"></i>
+                            <span class="text-sm text-gray-700">Current location detected</span>
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500">
+                            <option>Select category</option>
+                            <option>Harassment</option>
+                            <option>Poor Lighting</option>
+                            <option>Stray Dogs</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                        <textarea rows="3" placeholder="Describe the unsafe condition..." 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"></textarea>
+                    </div>
+
+                    <!-- Anonymous Toggle -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Report anonymously</span>
+                        <button class="w-12 h-6 bg-primary-500 rounded-full relative">
+                            <div class="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+                        </button>
+                    </div>
+
+                    <!-- Submit -->
+                    <button class="w-full bg-warning-500 text-white py-3 rounded-lg font-medium hover:bg-warning-600 transition-colors">
+                        Submit Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="max-w-md mx-auto bg-white border-t border-gray-200 fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full">
+        <div class="flex items-center justify-around py-2">
+            <button id="navHome" class="p-3 text-primary-500">
+                <i class="fas fa-home text-lg"></i>
+            </button>
+            <button id="navGuardians" class="p-3 text-gray-400">
+                <i class="fas fa-users text-lg"></i>
+            </button>
+            <button id="navReports" class="p-3 text-gray-400">
+                <i class="fas fa-map-marked-alt text-lg"></i>
+            </button>
+            <button id="navProfile" class="p-3 text-gray-400">
+                <i class="fas fa-user text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-check-circle"></i>
+            <span>Action completed successfully</span>
+        </div>
+    </div>
+
+    <script>
+        // Page navigation simulation
+        (function() {
+            const pages = ['loginPage', 'homePage', 'tripPage', 'guardiansPage', 'reportsPage', 'incidentPage'];
+            const navButtons = ['navHome', 'navGuardians', 'navReports', 'navProfile'];
+            
+            function showPage(pageId) {
+                pages.forEach(p => {
+                    const page = document.getElementById(p);
+                    if (page) {
+                        page.classList.add('hidden');
+                    }
+                });
+                
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                }
+                
+                // Update nav states
+                navButtons.forEach(btn => {
+                    const button = document.getElementById(btn);
+                    if (button) {
+                        button.classList.remove('text-primary-500');
+                        button.classList.add('text-gray-400');
+                    }
+                });
+            }
+            
+            // Navigation handlers
+            document.getElementById('navHome')?.addEventListener('click', () => {
+                showPage('homePage');
+                document.getElementById('navHome').classList.remove('text-gray-400');
+                document.getElementById('navHome').classList.add('text-primary-500');
+            });
+            
+            document.getElementById('navGuardians')?.addEventListener('click', () => {
+                showPage('guardiansPage');
+                document.getElementById('navGuardians').classList.remove('text-gray-400');
+                document.getElementById('navGuardians').classList.add('text-primary-500');
+            });
+            
+            document.getElementById('navReports')?.addEventListener('click', () => {
+                showPage('reportsPage');
+                document.getElementById('navReports').classList.remove('text-gray-400');
+                document.getElementById('navReports').classList.add('text-primary-500');
+            });
+            
+            // Initialize with login page
+            showPage('loginPage');
+            
+            // Demo page transitions
+            setTimeout(() => {
+                showPage('homePage');
+                document.getElementById('navHome').classList.remove('text-gray-400');
+                document.getElementById('navHome').classList.add('text-primary-500');
+            }, 3000);
+        })();
+        
+        // Toast notification system
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.remove('hidden');
+                
+                // Auto hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // Emergency action handlers (demo only)
+        document.addEventListener('click', function(e) {
+            if (e.target.textContent.includes('Start Trip')) {
+                showPage('tripPage');
+                showToast('Trip started successfully');
+            }
+            
+            if (e.target.textContent.includes('SOS Now')) {
+                showPage('incidentPage');
+                showToast('Emergency alert sent to guardians', 'warning');
+            }
+            
+            if (e.target.textContent.includes('Report Unsafe')) {
+                showToast('Report submitted successfully');
+            }
+        });
+        
+        // Service Worker registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // TODO: Register service worker for PWA functionality
+                console.log('Service Worker registration would happen here');
+            });
+        }
+        
+        // Mock geolocation updates
+        function startLocationTracking() {
+            if (navigator.geolocation) {
+                // TODO: Implement real geolocation tracking
+                console.log('Geolocation tracking would start here');
+            }
+        }
+        
+        // FCM token management
+        function initializeFirebaseMessaging() {
+            // TODO: Initialize Firebase messaging and get FCM token
+            console.log('Firebase messaging initialization would happen here');
+        }
+    </script>
+</body>
+</html>
